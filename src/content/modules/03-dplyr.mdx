@@ -1,0 +1,156 @@
+---
+title: "Data Wrangling with dplyr"
+description: "Filter, select, mutate, and summarize with the tidyverse"
+order: 3
+duration: "50 min"
+---
+
+# Data Wrangling with dplyr
+
+`dplyr` is part of the tidyverse and provides a grammar of data manipulation. Its verbs are readable, fast, and work seamlessly with pipes.
+
+## Installation
+
+```r
+install.packages("tidyverse")  # includes dplyr
+library(dplyr)
+```
+
+## The Pipe Operator
+
+The `|>` native pipe (R 4.1+) passes the left-hand result as the first argument to the right-hand function. `%>%` from magrittr works the same way.
+
+```r
+# Without pipe
+filter(select(df, name, age), age > 30)
+
+# With pipe — reads top to bottom
+df |>
+  select(name, age) |>
+  filter(age > 30)
+```
+
+## Core dplyr Verbs
+
+We'll use the built-in `starwars` dataset.
+
+```r
+library(dplyr)
+data(starwars)
+```
+
+### `filter()` — Keep rows by condition
+
+```r
+starwars |>
+  filter(species == "Human", height > 170)
+```
+
+### `select()` — Keep or drop columns
+
+```r
+starwars |>
+  select(name, height, mass, species)
+
+# Drop columns with -
+starwars |>
+  select(-films, -vehicles, -starships)
+```
+
+### `mutate()` — Add or modify columns
+
+```r
+starwars |>
+  mutate(
+    bmi = mass / (height / 100)^2,
+    tall = height > 180
+  ) |>
+  select(name, height, mass, bmi, tall)
+```
+
+### `arrange()` — Sort rows
+
+```r
+starwars |>
+  arrange(desc(height))  # tallest first
+
+starwars |>
+  arrange(species, desc(mass))
+```
+
+### `summarise()` — Aggregate rows
+
+```r
+starwars |>
+  summarise(
+    n         = n(),
+    mean_ht   = mean(height, na.rm = TRUE),
+    median_mass = median(mass, na.rm = TRUE)
+  )
+```
+
+### `group_by()` + `summarise()` — Grouped summaries
+
+```r
+starwars |>
+  group_by(species) |>
+  summarise(
+    count    = n(),
+    mean_ht  = mean(height, na.rm = TRUE)
+  ) |>
+  arrange(desc(count))
+```
+
+## Joining Data Frames
+
+```r
+band_members
+# # A tibble: 3 × 2
+#   name  band
+# <chr> <chr>
+# 1 Mick  Stones
+# 2 John  Beatles
+# 3 Paul  Beatles
+
+band_instruments
+# # A tibble: 3 × 2
+#   name  plays
+# <chr> <chr>
+# 1 John  guitar
+# 2 Paul  bass
+# 3 Keith guitar
+
+left_join(band_members, band_instruments, by = "name")
+inner_join(band_members, band_instruments, by = "name")
+```
+
+| Function      | Keeps rows from |
+|---------------|-----------------|
+| `left_join`   | left table (all) |
+| `right_join`  | right table (all)|
+| `inner_join`  | both tables      |
+| `full_join`   | either table     |
+| `anti_join`   | left not in right|
+
+## Useful Helper Functions
+
+```r
+# Rename columns
+df |> rename(full_name = name)
+
+# Distinct rows
+df |> distinct(species)
+
+# Slice rows
+df |> slice(1:5)       # first 5
+df |> slice_max(height, n = 3)  # top 3 by height
+
+# Count
+df |> count(species, sort = TRUE)
+
+# Across — apply transformation to multiple columns
+df |>
+  mutate(across(where(is.numeric), scale))
+```
+
+> **Tip:** `glimpse(df)` is a dplyr-aware alternative to `str()` that shows column types and values more compactly.

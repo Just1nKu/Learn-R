@@ -1,0 +1,131 @@
+---
+title: "Data Visualization with ggplot2"
+description: "Build publication-quality plots using the grammar of graphics"
+order: 4
+duration: "55 min"
+---
+
+# Data Visualization with ggplot2
+
+`ggplot2` implements the **grammar of graphics**: every plot is built from layers — data, aesthetics, and geometric objects.
+
+## Setup
+
+```r
+install.packages("ggplot2")
+library(ggplot2)
+
+# Use the built-in mpg dataset
+data(mpg)
+```
+
+## The Core Pattern
+
+```r
+ggplot(data = <DATA>, aes(<MAPPINGS>)) +
+  <GEOM_FUNCTION>()
+```
+
+Every `ggplot2` call starts with `ggplot()`, then adds layers with `+`.
+
+## Scatter Plot
+
+```r
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point()
+```
+
+### Add color and shape by group
+
+```r
+ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
+  geom_point(size = 2, alpha = 0.7)
+```
+
+## Line Plot
+
+```r
+ggplot(economics, aes(x = date, y = unemploy)) +
+  geom_line(color = "steelblue")
+```
+
+## Bar Chart
+
+```r
+# Count of cars per class
+ggplot(mpg, aes(x = class)) +
+  geom_bar(fill = "steelblue")
+
+# With pre-computed values — use geom_col
+summary_df <- mpg |>
+  dplyr::count(class)
+
+ggplot(summary_df, aes(x = class, y = n)) +
+  geom_col(fill = "steelblue") +
+  coord_flip()
+```
+
+## Histogram and Density
+
+```r
+ggplot(mpg, aes(x = hwy)) +
+  geom_histogram(binwidth = 2, fill = "steelblue", color = "white")
+
+ggplot(mpg, aes(x = hwy, fill = drv)) +
+  geom_density(alpha = 0.4)
+```
+
+## Box Plot
+
+```r
+ggplot(mpg, aes(x = class, y = hwy, fill = class)) +
+  geom_boxplot(outlier.alpha = 0.5) +
+  theme(legend.position = "none")
+```
+
+## Facets — Small Multiples
+
+```r
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  facet_wrap(~ class, ncol = 3)
+
+# Two-variable faceting
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point() +
+  facet_grid(drv ~ cyl)
+```
+
+## Labels and Themes
+
+```r
+ggplot(mpg, aes(x = displ, y = hwy, color = class)) +
+  geom_point() +
+  labs(
+    title    = "Engine Size vs Highway MPG",
+    subtitle = "2008 vehicle data",
+    x        = "Engine displacement (L)",
+    y        = "Highway fuel economy (mpg)",
+    color    = "Vehicle class"
+  ) +
+  theme_minimal()
+```
+
+### Common Themes
+
+| Theme              | Style                    |
+|--------------------|--------------------------|
+| `theme_gray()`     | default ggplot2 gray     |
+| `theme_bw()`       | black & white            |
+| `theme_minimal()`  | minimal gridlines        |
+| `theme_classic()`  | no gridlines             |
+| `theme_void()`     | blank canvas             |
+
+## Saving Plots
+
+```r
+ggsave("my_plot.png", width = 8, height = 5, dpi = 300)
+ggsave("my_plot.pdf", width = 8, height = 5)
+```
+
+> **Tip:** `ggsave()` automatically saves the last plot. Pass a `plot =` argument to save a specific stored plot object.

@@ -1,0 +1,153 @@
+---
+title: "Statistical Analysis"
+description: "Descriptive stats, hypothesis testing, and regression in R"
+order: 5
+duration: "60 min"
+---
+
+# Statistical Analysis in R
+
+R was built for statistics. This module covers descriptive statistics, common hypothesis tests, and linear regression.
+
+## Descriptive Statistics
+
+```r
+x <- c(12, 15, 14, 10, 18, 22, 16, 11)
+
+mean(x)     # 14.75
+median(x)   # 14.5
+sd(x)       # 3.77
+var(x)      # 14.21
+range(x)    # 10 22
+quantile(x) # 0% 25% 50% 75% 100%
+IQR(x)      # interquartile range
+summary(x)  # all of the above at once
+```
+
+## The Normal Distribution
+
+```r
+# Density, cumulative, quantile, and random sampling
+dnorm(0)            # density at x = 0
+pnorm(1.96)         # P(X ≤ 1.96) ≈ 0.975
+qnorm(0.975)        # quantile: ~1.96
+rnorm(100, mean = 0, sd = 1)  # 100 random draws
+```
+
+## Hypothesis Testing
+
+### One-Sample t-Test
+
+```r
+# Test if mean == 10
+t.test(x, mu = 10)
+```
+
+### Two-Sample t-Test
+
+```r
+group_a <- c(12, 15, 14, 16, 13)
+group_b <- c(18, 22, 20, 19, 21)
+
+t.test(group_a, group_b, var.equal = FALSE)
+```
+
+Output includes t-statistic, degrees of freedom, p-value, and 95% CI.
+
+### Paired t-Test
+
+```r
+before <- c(85, 90, 78, 92, 88)
+after  <- c(80, 86, 75, 88, 84)
+
+t.test(before, after, paired = TRUE)
+```
+
+### Chi-Square Test
+
+```r
+observed <- c(30, 70)
+expected <- c(50, 50)
+chisq.test(observed, p = c(0.5, 0.5))
+
+# For a contingency table
+tbl <- table(mpg$drv, mpg$cyl)
+chisq.test(tbl)
+```
+
+### Shapiro-Wilk Normality Test
+
+```r
+shapiro.test(x)
+# p > 0.05 → fail to reject normality
+```
+
+## Correlation
+
+```r
+cor(mpg$displ, mpg$hwy)                  # Pearson r
+cor(mpg$displ, mpg$hwy, method = "spearman")
+cor.test(mpg$displ, mpg$hwy)             # with CI and p-value
+```
+
+## Linear Regression
+
+```r
+model <- lm(hwy ~ displ + cyl, data = mpg)
+summary(model)
+```
+
+Key output:
+- **Coefficients**: estimated effects
+- **R²**: variance explained
+- **p-values**: significance of each predictor
+
+### Accessing Model Components
+
+```r
+coef(model)       # coefficients
+fitted(model)     # predicted values
+residuals(model)  # observed - predicted
+confint(model)    # 95% confidence intervals
+```
+
+### Diagnostics
+
+```r
+par(mfrow = c(2, 2))
+plot(model)
+```
+
+The four diagnostic plots check linearity, normality of residuals, homoscedasticity, and influential points.
+
+### Predictions
+
+```r
+new_data <- data.frame(displ = 3.0, cyl = 6)
+predict(model, newdata = new_data, interval = "confidence")
+```
+
+## Multiple Regression and Interactions
+
+```r
+# Interaction term
+model2 <- lm(hwy ~ displ * cyl, data = mpg)
+
+# Add polynomial term
+model3 <- lm(hwy ~ poly(displ, 2) + cyl, data = mpg)
+
+# Compare models with ANOVA
+anova(model, model2)
+```
+
+## ANOVA
+
+```r
+aov_model <- aov(hwy ~ class, data = mpg)
+summary(aov_model)
+
+# Post-hoc pairwise comparisons
+TukeyHSD(aov_model)
+```
+
+> **Note:** Always check assumptions (normality, equal variance) before interpreting test results. Use `shapiro.test()` and `bartlett.test()` / `leveneTest()`.

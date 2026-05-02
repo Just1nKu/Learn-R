@@ -1,0 +1,86 @@
+---
+title: "R Basics"
+description: "Variables, data types, and your first R program"
+order: 1
+duration: "45 min"
+---
+
+# R Basics
+
+Welcome to your first R lesson. By the end of this module you'll understand
+variables, data types, and how to run your first script.
+
+## Variables
+
+In R, you assign values using the `<-` operator:
+
+```r
+name <- "Justin"
+age  <- 25
+gpa  <- 3.85
+```
+
+## Data Types
+
+| Type      | Example          | Check with      |
+|-----------|------------------|-----------------|
+| Numeric   | `3.14`           | `is.numeric()`  |
+| Integer   | `5L`             | `is.integer()`  |
+| Character | `"hello"`        | `is.character()`|
+| Logical   | `TRUE` / `FALSE` | `is.logical()`  |
+
+```r
+class(42)       # "numeric"
+class(42L)      # "integer"
+class("hello")  # "character"
+class(TRUE)     # "logical"
+```
+
+## Arithmetic Operators
+
+```r
+5 + 3   # 8
+5 - 3   # 2
+5 * 3   # 15
+5 / 3   # 1.666...
+5 ^ 2   # 25  (exponentiation)
+5 %% 3  # 2   (modulus)
+```
+
+## Functions
+
+```r
+sqrt(16)         # 4
+abs(-7)          # 7
+round(3.567, 2)  # 3.57
+nchar("hello")   # 5
+toupper("hello") # "HELLO"
+```
+
+### Writing Your Own Functions
+
+```r
+greet <- function(name) {
+  paste("Hello,", name)
+}
+
+greet("Justin")  # "Hello, Justin"
+```
+
+## Control Flow
+
+```r
+x <- 10
+
+if (x > 5) {
+  print("x is large")
+} else {
+  print("x is small")
+}
+
+for (i in 1:5) {
+  cat(i, "\n")
+}
+```
+
+> **Tip:** Use `Ctrl + Enter` in RStudio to run a line without leaving the editor.

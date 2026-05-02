@@ -1,0 +1,227 @@
+---
+title: "Biomedical Applications"
+description: "Survival analysis, clinical data workflows, and Bioconductor basics"
+order: 6
+duration: "70 min"
+---
+
+# Biomedical Applications of R
+
+R is widely used in clinical research, genomics, and epidemiology. This module introduces survival analysis, clinical data workflows, and the Bioconductor ecosystem.
+
+## Survival Analysis
+
+Survival analysis models time-to-event data (death, relapse, hospital discharge).
+
+### Installation
+
+```r
+install.packages("survival")
+install.packages("survminer")
+library(survival)
+library(survminer)
+```
+
+### The Surv Object
+
+```r
+data(lung)  # NCCTG lung cancer data
+
+# Create survival object: time + event indicator (1 = event)
+surv_obj <- Surv(time = lung$time, event = lung$status)
+```
+
+### Kaplan-Meier Estimator
+
+```r
+km_fit <- survfit(Surv(time, status) ~ sex, data = lung)
+summary(km_fit)
+
+# Plot with survminer
+ggsurvplot(
+  km_fit,
+  data      = lung,
+  pval      = TRUE,
+  conf.int  = TRUE,
+  risk.table = TRUE,
+  legend.labs = c("Male", "Female"),
+  title     = "Survival by Sex — NCCTG Lung Cancer"
+)
+```
+
+### Log-Rank Test
+
+```r
+survdiff(Surv(time, status) ~ sex, data = lung)
+# p < 0.05 indicates groups differ significantly
+```
+
+### Cox Proportional Hazards Model
+
+```r
+cox_model <- coxph(
+  Surv(time, status) ~ age + sex + ph.ecog,
+  data = lung
+)
+summary(cox_model)
+
+# Hazard ratios with 95% CI
+exp(coef(cox_model))
+exp(confint(cox_model))
+```
+
+Check proportional hazards assumption:
+
+```r
+cox.zph(cox_model)
+```
+
+## Clinical Data Workflows
+
+### Reading Clinical Data
+
+```r
+library(readr)
+
+# CSV
+patients <- read_csv("patients.csv")
+
+# Excel
+library(readxl)
+lab_results <- read_excel("labs.xlsx", sheet = "CBC")
+```
+
+### Handling Dates
+
+```r
+library(lubridate)
+
+df$dob <- as.Date(df$dob, format = "%Y-%m-%d")
+df$age_years <- as.numeric(Sys.Date() - df$dob) / 365.25
+
+# Parse various formats
+ymd("2024-03-15")
+mdy("03/15/2024")
+dmy("15-03-2024")
+```
+
+### Missing Data
+
+```r
+# Check missingness
+colSums(is.na(df))
+
+# Complete cases only
+df_complete <- df[complete.cases(df), ]
+
+# Imputation with mice
+library(mice)
+imputed <- mice(df, m = 5, method = "pmm", seed = 42)
+df_imputed <- complete(imputed)
+```
+
+### Reproducible Tables
+
+```r
+library(gtsummary)
+
+tbl_summary(
+  lung,
+  by = sex,
+  include = c(age, ph.ecog, ph.karno, wt.loss),
+  label  = list(ph.ecog ~ "ECOG Score", wt.loss ~ "Weight Loss (lbs)")
+) |>
+  add_p() |>
+  add_overall()
+```
+
+## Bioconductor Basics
+
+Bioconductor provides packages for genomic data analysis.
+
+### Installation
+
+```r
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("DESeq2")
+BiocManager::install("limma")
+BiocManager::install("Biostrings")
+```
+
+### RNA-seq Differential Expression with DESeq2
+
+```r
+library(DESeq2)
+
+# Create DESeqDataSet from count matrix
+dds <- DESeqDataSetFromMatrix(
+  countData = count_matrix,
+  colData   = sample_metadata,
+  design    = ~ condition
+)
+
+# Filter low-count genes
+dds <- dds[rowSums(counts(dds)) >= 10, ]
+
+# Run analysis
+dds <- DESeq(dds)
+res <- results(dds, contrast = c("condition", "treated", "control"))
+```
+
+### Volcano Plot
+
+```r
+library(EnhancedVolcano)
+
+EnhancedVolcano(
+  res,
+  lab     = rownames(res),
+  x       = "log2FoldChange",
+  y       = "pvalue",
+  title   = "Treated vs Control",
+  pCutoff = 0.05,
+  FCcutoff = 1.5
+)
+```
+
+### Working with Genomic Ranges
+
+```r
+library(GenomicRanges)
+
+gr <- GRanges(
+  seqnames = c("chr1", "chr2", "chr3"),
+  ranges   = IRanges(start = c(100, 200, 300), width = 50),
+  strand   = c("+", "-", "*")
+)
+
+findOverlaps(gr, query_ranges)
+```
+
+## Reporting with R Markdown / Quarto
+
+Combine code, results, and narrative in a single reproducible document.
+
+```r
+---
+title: "Clinical Analysis Report"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Results
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(gtsummary)
+```
+
+```{r table1}
+tbl_summary(lung, by = sex)
+```
+```
+
+> **Resources:** [Bioconductor workflows](https://bioconductor.org/packages/release/workflows/) include end-to-end tutorials for RNA-seq, ChIP-seq, single-cell analysis, and more.

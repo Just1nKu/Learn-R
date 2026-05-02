@@ -1,0 +1,156 @@
+---
+title: "Data Structures"
+description: "Vectors, lists, matrices, and data frames"
+order: 2
+duration: "40 min"
+---
+
+# Data Structures
+
+R provides four core data structures you'll use constantly: vectors, lists, matrices, and data frames.
+
+## Vectors
+
+A vector is a one-dimensional sequence of values, all of the **same type**.
+
+```r
+nums  <- c(1, 2, 3, 4, 5)
+names <- c("Alice", "Bob", "Carol")
+flags <- c(TRUE, FALSE, TRUE)
+```
+
+### Indexing Vectors
+
+R uses 1-based indexing.
+
+```r
+nums[1]       # 1  (first element)
+nums[2:4]     # 2 3 4
+nums[c(1, 3)] # 1 3
+nums[-1]      # all except first: 2 3 4 5
+```
+
+### Vectorized Operations
+
+Operations apply element-wise — no loops needed.
+
+```r
+nums * 2       # 2 4 6 8 10
+nums + 10      # 11 12 13 14 15
+nums > 3       # FALSE FALSE FALSE TRUE TRUE
+nums[nums > 3] # 4 5
+```
+
+### Useful Vector Functions
+
+```r
+length(nums)  # 5
+sum(nums)     # 15
+mean(nums)    # 3
+max(nums)     # 5
+min(nums)     # 1
+rev(nums)     # 5 4 3 2 1
+sort(nums)    # ascending order
+```
+
+## Lists
+
+Lists can hold elements of **different types**, including other lists.
+
+```r
+patient <- list(
+  id      = 101,
+  name    = "Alice",
+  active  = TRUE,
+  scores  = c(88, 92, 95)
+)
+```
+
+### Accessing List Elements
+
+```r
+patient$name       # "Alice"
+patient[["name"]]  # same
+patient[[4]]       # c(88, 92, 95)
+```
+
+## Matrices
+
+A matrix is a 2-dimensional vector (all elements same type).
+
+```r
+m <- matrix(1:9, nrow = 3, ncol = 3)
+#      [,1] [,2] [,3]
+# [1,]    1    4    7
+# [2,]    2    5    8
+# [3,]    3    6    9
+```
+
+### Matrix Indexing
+
+```r
+m[1, 2]   # row 1, col 2 → 4
+m[2, ]    # entire row 2
+m[, 3]    # entire column 3
+```
+
+### Matrix Arithmetic
+
+```r
+t(m)        # transpose
+m %*% m     # matrix multiplication
+rowSums(m)  # sum each row
+colMeans(m) # mean of each column
+```
+
+## Data Frames
+
+A data frame is a table: each column can be a different type, and all columns have the same length. This is the most common structure for real data.
+
+```r
+df <- data.frame(
+  id     = 1:4,
+  name   = c("Alice", "Bob", "Carol", "Dave"),
+  age    = c(28, 34, 22, 45),
+  active = c(TRUE, FALSE, TRUE, TRUE)
+)
+```
+
+### Exploring a Data Frame
+
+```r
+nrow(df)      # 4
+ncol(df)      # 4
+dim(df)       # 4 4
+names(df)     # column names
+str(df)       # structure overview
+head(df, 2)   # first 2 rows
+summary(df)   # summary stats per column
+```
+
+### Accessing Columns and Rows
+
+```r
+df$name           # name column as vector
+df[, "age"]       # same
+df[1, ]           # first row
+df[df$age > 30, ] # rows where age > 30
+```
+
+### Adding Columns
+
+```r
+df$bmi <- c(22.1, 27.3, 19.8, 30.5)
+```
+
+## Factors
+
+Factors represent categorical data with defined levels.
+
+```r
+status <- factor(c("low", "high", "medium", "low", "high"))
+levels(status)  # "high" "low" "medium"
+table(status)   # frequency count
+```
+
+> **Good to know:** When reading CSV files with `read.csv()`, character columns are automatically converted to factors in older R versions. Use `stringsAsFactors = FALSE` to prevent this.
